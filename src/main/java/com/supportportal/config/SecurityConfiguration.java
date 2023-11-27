@@ -3,6 +3,8 @@ package com.supportportal.config;
 import com.supportportal.security.filter.JwtAccessDeniedHandler;
 import com.supportportal.security.filter.JwtAuthenticationEntryPoint;
 import com.supportportal.security.filter.JwtAuthorizationFilter;
+import com.supportportal.security.manager.SupportPortalAuthenticationProvider;
+import com.supportportal.security.manager.SupportportalAuthenticationManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -27,6 +27,8 @@ public class SecurityConfiguration {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
+    private final SupportportalAuthenticationManager authenticationManager;
+    private final SupportPortalAuthenticationProvider authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,6 +46,8 @@ public class SecurityConfiguration {
                     customizer.accessDeniedHandler(jwtAccessDeniedHandler);
                     customizer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
                 })
+                .authenticationManager(authenticationManager)
+                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
