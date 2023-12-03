@@ -6,8 +6,11 @@ import com.supportportal.security.filter.JwtAuthorizationFilter;
 import com.supportportal.security.manager.SupportPortalAuthenticationProvider;
 import com.supportportal.security.manager.SupportportalAuthenticationManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +32,11 @@ public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final SupportportalAuthenticationManager authenticationManager;
     private final SupportPortalAuthenticationProvider authenticationProvider;
+
+    @Bean
+    public AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

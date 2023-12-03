@@ -2,9 +2,9 @@ package com.supportportal.constant;
 
 public class EmailConstant {
     public static final String SIMPLE_EMAIL_TRANSFER_PROTOCOL = "smtps";
-    public static final String USERNAME = "mlbbx2001@gmail.com";
-    public static final String PASSWORD = "1738Lover";
-    public static final String FROM_EAMIL = "mlbbx2001@gmail.com";
+    public static final String USERNAME = "nyizeya103@gmail.com";
+    public static final String PASSWORD = "ssbu nyum afis ueol ";
+    public static final String FROM_EAMIL = "nyizeya103@gmail.com";
     public static final String CC_EMAIL = "";
     public static final String EMAIL_SUBJECT = "Get Arrays, LLC - New Password";
     public static final String GMAIL_SMTP_SERVER = "smtp.gmail.com";
