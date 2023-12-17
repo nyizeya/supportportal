@@ -10,6 +10,7 @@ public class SecurityConstant {
     public static final String AUTHORITIES = "authorities";
     public static final String FORBIDDEN_MESSAGE = "You need to login to access this page";
     public static final String ACCESS_DENIED_MESSAGE = "You do not have permission to access this page";
+    public static final String NO_USER_FOUND_BY_EMAIL = "No user found by email.";
     public static final String[] PUBLIC_URLS = {"/user/login", "/user/register", "/user/reset-password", "/user/image/**"};
     
 }

@@ -4,13 +4,14 @@ import com.supportportal.domain.User;
 import com.supportportal.domain.UserPrincipal;
 import com.supportportal.enumeration.Role;
 import com.supportportal.exception.domain.EmailExistsException;
+import com.supportportal.exception.domain.EmailNotFoundException;
 import com.supportportal.exception.domain.UserNotFoundException;
 import com.supportportal.exception.domain.UsernameExistsException;
 import com.supportportal.repository.UserRepository;
 import com.supportportal.service.EmailService;
 import com.supportportal.service.LoginAttemptService;
 import com.supportportal.service.UserService;
-import jakarta.mail.MessagingException;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,8 +25,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
+
+import static com.supportportal.constant.FileConstant.*;
+import static com.supportportal.constant.SecurityConstant.NO_USER_FOUND_BY_EMAIL;
 
 @Slf4j
 @Service
@@ -96,6 +105,59 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) {
         return null;
+    }
+
+    @Override
+    public User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException {
+        User currentUser = validateNewUsernameAndEmail(currentUsername, newUsername, newEmail);
+        currentUser.setFirstName(newFirstName);
+        currentUser.setLastName(newLastName);
+        currentUser.setUsername(newUsername);
+        currentUser.setEmail(newEmail);
+        currentUser.setActive(true);
+        currentUser.setNotLocked(true);
+        userRepository.save(currentUser);
+        return currentUser;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public void resetPassword(String email) throws EmailNotFoundException, MessagingException {
+        User user = userRepository.findUserByEmail(email).orElseThrow(() -> new EmailNotFoundException(NO_USER_FOUND_BY_EMAIL));
+        String password = generatePassword();
+        user.setPassword(encodePassword(password));
+        userRepository.save(user);
+        emailService.sendNewPasswordEmail(user.getFirstName(), password, email);
+    }
+
+    @Override
+    public User updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+        User user = validateNewUsernameAndEmail(username, null, null);
+        saveProfileImage(user, profileImage);
+        return user;
+    }
+
+    private void saveProfileImage(User user, MultipartFile profileImage) throws IOException {
+        if (null != profileImage) {
+            Path userFolder = Paths.get(USER_FOLDER).resolve(user.getUsername()).toAbsolutePath().normalize(); // /home/supportportal/user/nyizeya
+            if (!Files.exists(userFolder)) {
+                Files.createDirectories(userFolder);
+                log.info("{} {}", DIRECTORY_CREATED, userFolder);
+            }
+
+            Files.copy(profileImage.getInputStream(), userFolder.resolve(user.getUsername() + DOT + JPG_EXTENSION), StandardCopyOption.REPLACE_EXISTING);
+            user.setProfileImageUrl(setProfileImageUrl(user.getUsername()));
+            userRepository.save(user);
+            log.info("{} {}", FILE_SAVED_IN_FILE_SYSTEM, profileImage.getOriginalFilename());
+        }
+    }
+
+    private String setProfileImageUrl(String username) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(USER_IMAGE_PATH + username + FORWARD_SLASH + username + DOT + JPG_EXTENSION).toUriString();
     }
 
     @Override

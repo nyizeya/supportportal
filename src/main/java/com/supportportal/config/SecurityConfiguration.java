@@ -3,60 +3,52 @@ package com.supportportal.config;
 import com.supportportal.security.filter.JwtAccessDeniedHandler;
 import com.supportportal.security.filter.JwtAuthenticationEntryPoint;
 import com.supportportal.security.filter.JwtAuthorizationFilter;
-import com.supportportal.security.manager.SupportPortalAuthenticationProvider;
-import com.supportportal.security.manager.SupportportalAuthenticationManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationEventPublisher;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static com.supportportal.constant.SecurityConstant.PUBLIC_URLS;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
-public class SecurityConfiguration {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
-    private final SupportportalAuthenticationManager authenticationManager;
-    private final SupportPortalAuthenticationProvider authenticationProvider;
 
     @Bean
-    public AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .userDetailsService(userDetailsService)
-                .authorizeHttpRequests(requestCustomizer -> {
-                    requestCustomizer.anyRequest().permitAll();
-//                    requestCustomizer.requestMatchers(SecurityConstant.PUBLIC_URLS).permitAll();
-//                    requestCustomizer.anyRequest().authenticated();
-                })
+                .authorizeRequests().mvcMatchers(PUBLIC_URLS).permitAll()
+                .anyRequest().authenticated()
+                .and()
                 .exceptionHandling(customizer -> {
                     customizer.accessDeniedHandler(jwtAccessDeniedHandler);
                     customizer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
                 })
-                .authenticationManager(authenticationManager)
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

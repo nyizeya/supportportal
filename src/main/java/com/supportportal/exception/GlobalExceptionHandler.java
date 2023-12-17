@@ -3,7 +3,7 @@ package com.supportportal.exception;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.supportportal.domain.HttpResponse;
 import com.supportportal.exception.domain.*;
-import jakarta.persistence.NoResultException;
+import javax.persistence.NoResultException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpMethod;
@@ -140,4 +140,8 @@ public class GlobalExceptionHandler implements ErrorController {
         return new ResponseEntity<>(response, httpStatus);
     }
 
+    @Override
+    public String getErrorPath() {
+        return "/error";
+    }
 }

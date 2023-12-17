@@ -1,7 +1,7 @@
 package com.supportportal.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;

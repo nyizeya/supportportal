@@ -1,11 +1,11 @@
 package com.supportportal.service;
 
 import com.sun.mail.smtp.SMTPTransport;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.supportportal.domain.UserPrincipal;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,10 +14,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.supportportal.constant.SecurityConstant.*;
 
@@ -41,7 +42,7 @@ public class TokenProvider {
 
     public List<SimpleGrantedAuthority> getAuthorities(String token) {
         String[] claims = getClaimsFromToken(token);
-        return Arrays.stream(claims).map(SimpleGrantedAuthority::new).toList();
+        return Arrays.stream(claims).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
     public Authentication getAuthentication(String username, List<SimpleGrantedAuthority> authorities, HttpServletRequest request) {

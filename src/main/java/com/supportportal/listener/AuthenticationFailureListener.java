@@ -19,7 +19,8 @@ public class AuthenticationFailureListener {
     public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent event) throws ExecutionException {
         log.info("AuthenticationFailureBadCredentialsEvent Triggered");
         Object principal = event.getAuthentication().getPrincipal();
-        if (principal instanceof String email) {
+        if (principal instanceof String) {
+            String email = (String) principal;
             loginAttemptService.addUserToLoginAttemptCache(email);
         }
     }

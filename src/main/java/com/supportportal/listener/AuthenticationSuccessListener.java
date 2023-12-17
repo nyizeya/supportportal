@@ -18,7 +18,8 @@ public class AuthenticationSuccessListener {
     public void onAuthenticationSuccess(AuthenticationSuccessEvent event) {
         log.info("AuthenticationSuccessEvent Triggered");
         Object principal = event.getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails user) {
+        if (principal instanceof UserDetails) {
+            UserDetails user = (UserDetails) principal;
             loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
         }
     }
